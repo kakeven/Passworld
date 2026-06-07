@@ -21,32 +21,68 @@ function entrar(){
 
 <style scoped>
     
-    .container{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        background-color: rgb(30, 126, 209);
-    }
-    h1{
-        margin-bottom: 40px;
-        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-        font-weight: 300;
-    }
-    #entrar{
-        margin-top: 15px;
-        background-color: aliceblue;
-        border: 0;
-        padding: 10px;
-        border-radius: 10px;
-        cursor: pointer;
-    }
+    .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: #020617;
+}
 
-    #input{
-        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-        border-radius: 3px;
-        border: 0;
-        padding: 2px;
-    }
+h1 {
+    margin-bottom: 32px;
+    color: #f8fafc;
+    font-size: 2rem;
+    font-weight: 600;
+    font-family: Inter, Arial, sans-serif;
+}
+
+#input {
+    width: 320px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+
+    color: white;
+    font-size: 1rem;
+    outline: none;
+}
+
+#input:focus {
+    border-color: #3b82f6;
+}
+
+#input::placeholder {
+    color: #94a3b8;
+}
+
+#entrar {
+    width: 320px;
+    padding: 12px;
+
+    background: #2563eb;
+    color: white;
+
+    border: none;
+    border-radius: 12px;
+
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+#entrar:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+}
+
+#entrar:active {
+    transform: translateY(0);
+}
 </style>
