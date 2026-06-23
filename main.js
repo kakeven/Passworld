@@ -1,7 +1,7 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
-
+const { exec } = require("child_process");
 let backendProcess;
 
 function createWindow() {
@@ -31,9 +31,7 @@ app.whenReady().then(() => {
 });
 
 app.on("before-quit", () => {
-  if (backendProcess) {
-    backendProcess.kill();
-  }
+  exec("taskkill /F /IM backend.exe /T");
 });
 
 app.on("window-all-closed", () => {

@@ -14,7 +14,7 @@
       "preload.js",
       "frontend/dist/**/*"
     ],
-    "extraFiles": [
+    "extraResources": [
       {
         "from": "backend.exe",
         "to": "backend.exe"
