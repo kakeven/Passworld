@@ -1,5 +1,8 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
+const { spawn } = require("child_process");
+
+let backendProcess;
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -12,11 +15,29 @@ function createWindow() {
     }
   });
 
-  win.loadFile("frontend/index.html");
+  win.loadFile("frontend/dist/index.html");
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  const backendPath = app.isPackaged
+    ? path.join(process.resourcesPath, "backend.exe")
+    : path.join(__dirname, "backend.exe");
+
+  backendProcess = spawn(backendPath, [], {
+    windowsHide: true
+  });
+
+  createWindow();
+});
+
+app.on("before-quit", () => {
+  if (backendProcess) {
+    backendProcess.kill();
+  }
+});
 
 app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") app.quit();
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
 });

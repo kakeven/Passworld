@@ -3,9 +3,29 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.passworld.app",
+    "productName": "Passworld",
+    "files": [
+      "main.js",
+      "preload.js",
+      "frontend/dist/**/*"
+    ],
+    "extraFiles": [
+      {
+        "from": "backend.exe",
+        "to": "backend.exe"
+      }
+    ],
+    "win": {
+      "target": "nsis"
+    }
   },
   "devDependencies": {
-    "electron": "^42.3.0"
+    "electron": "^42.3.0",
+    "electron-builder": "^26.15.3"
   }
 }
