@@ -1,11 +1,27 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { apiFetch } from "@/js/fetch";
 const senha = ref('')
 const router = useRouter()
 
-function entrar(){
-    router.push('/vault')
+async function entrar() {
+    try {
+        const resposta = await apiFetch("/unlock", {
+            method: "POST",
+            body: JSON.stringify({
+                password: senha.value
+            })
+        });
+
+        if (resposta.token) {
+            localStorage.setItem("token", resposta.token);
+            router.push("/vault");
+        }
+    } catch (erro) {
+        console.error(erro);
+        alert("Senha inválida");
+    }
 }
 </script>
 

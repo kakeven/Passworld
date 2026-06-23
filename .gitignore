@@ -42,3 +42,5 @@ __screenshots__/
 __pycache__/
 *.pyc
 .venv/
+
+.env

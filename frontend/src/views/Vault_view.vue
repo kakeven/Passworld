@@ -1,14 +1,56 @@
 <script setup>
+    import { apiFetch } from '@/js/fetch';
     import { ref,computed } from 'vue';
     import { onUnmounted,onMounted } from 'vue';
-    const buscar = ref('');
-    const credenciais = ref([
-    { id: 1, servico: 'GitHub', usuario: 'kaua@email.com', senha: '123456' },
-    { id: 2, servico: 'Gmail', usuario: 'kaua@gmail.com', senha: 'abcdef' },
-    { id: 3, servico: 'discord', usuario: 'kaua@gmail.com', senha: 'abcdef' },
-    { id: 4, servico: 'nexus', usuario: 'kaua@gmail.com', senha: 'abcdef' },
-    ])
+    import { reactive } from 'vue'   
+    import { useToast } from "vue-toastification";
+    import Swal from 'sweetalert2'
+    import olho_fechado from '@/assets/olho-fechado.svg'
+    import olho_aberto from '@/assets/olho-aberto.svg'
     
+    const toast = useToast()
+    const senha_visivel = ref(false)
+    
+    
+    
+    function ver_token(){
+        return localStorage.getItem("token")
+    }
+    
+    const config_visivel = ref(false)
+    const config_senha = reactive({
+    tamanho: 16,
+    letras: true,
+    numeros: true,
+    especiais: true,
+    })
+
+    async function gerar_senha() {
+        const params = new URLSearchParams ({
+            tamanho: config_senha.tamanho,
+            letras: config_senha.letras ? 1 : 0,
+            numeros: config_senha.numeros ? 1 : 0,
+            especiais: config_senha.especiais ? 1 : 0,
+        })
+        const res = await apiFetch(`/generate?${params}`)
+        console.log(params)
+        console.log(res)
+        modal_senha.value = res.password
+    }
+
+    const buscar = ref('');
+    const credenciais = ref([]);
+    onMounted(async () => {
+    try {
+        credenciais.value = await apiFetch("/entries")
+    } catch (erro) {
+        console.error(erro);
+    }
+    });
+   
+    console.log(ver_token())
+    console.log(credenciais)
+
     const menuX = ref(0);
     const menuY = ref(0);
     const menu_visivel = ref(false);
@@ -19,12 +61,29 @@
     const modal_login = ref('')
     const modal_servico = ref('')
     
+    const editando = ref(false)
+
     const busca_resultado = computed(()=>{
-        return credenciais.value.filter(b=>b.servico.toLowerCase().includes(buscar.value.toLowerCase()))
+        return credenciais.value.filter(b=>b.service.toLowerCase().includes(buscar.value.toLowerCase()))
     })
     
-    function excluir_credencial(){
-        return credenciais.value = credenciais.value.filter(c => c.id !== credencial_selecionada.value.id)
+    async function excluir_credencial(entry_id){
+        const result = await Swal.fire({
+        title: "Excluir credencial?",
+        text: "Essa ação não pode ser desfeita.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Excluir",
+        cancelButtonText: "Cancelar",
+        background: '#1e293b',
+        color: '#f8fafc',
+    })
+
+    if (result.isConfirmed) {
+        apiFetch(`/entries/delete/${entry_id}`, { method: "DELETE" })
+        credenciais.value = credenciais.value.filter(c => c.id != entry_id)
+        toast.success("Credencial excluída")
+    }
     }
 
     function abrir_menu(e,credencial){
@@ -57,7 +116,8 @@
     })
 
     function copiar_senha(){
-        navigator.clipboard.writeText(credencial_selecionada.value.senha)
+        navigator.clipboard.writeText(credencial_selecionada.value.password)
+        toast.info("Senha copiada")
     }
 
     function resetar_modal(){
@@ -66,14 +126,49 @@
         modal_senha.value = ''
     }
 
-    function salvar_credencial(){
-        credenciais.value.push({
-        id: credenciais.value.length + 1,
-        servico: modal_servico.value,
-        usuario: modal_login.value,
-        senha: modal_senha.value
-         })
-        fechar_modal()
+    async function salvar_credencial(entry_id=null){
+        if (!editando.value){
+            const res = await  apiFetch("/create_entry",{
+                method:"POST",
+                body: JSON.stringify ({
+                    "service": modal_servico.value,
+                    "login": modal_login.value,
+                    "password": modal_senha.value,
+                })
+            })
+            const {id} = await res
+            credenciais.value.push({
+                id,
+                service: modal_servico.value,
+                login: modal_login.value,
+                password: modal_senha.value,
+            })
+            fechar_modal()
+        }else{
+            apiFetch(`/update_entry/${entry_id}`,{
+                method: "PATCH",
+                body: JSON.stringify({
+                    "service": modal_servico.value,
+                    "login": modal_login.value,
+                    "password": modal_senha.value,
+                })
+            })
+            
+            credencial_selecionada.value.service = modal_servico.value
+            credencial_selecionada.value.login = modal_login.value
+            credencial_selecionada.value.password = modal_senha.value
+            fechar_modal()
+            editando.value = false
+        }
+       
+    }
+
+    function editar_credencial(){
+        editando.value = true
+        modal_servico.value = credencial_selecionada.value.service
+        modal_login.value = credencial_selecionada.value.login
+        modal_senha.value = credencial_selecionada.value.password
+        abrir_modal()
     }
 
 </script>
@@ -86,13 +181,13 @@
     </header>
     <main>
         <div class="card" v-for="credencial in busca_resultado" :key="credencial.id" @contextmenu="(e)=>abrir_menu(e,credencial)" >
-            <p>{{ credencial.servico }}</p>
-            <p>{{ credencial.usuario }}</p>
+            <p>{{ credencial.service }}</p>
+            <p>{{ credencial.login }}</p>
         </div>
         <div class="menu-contexto"  v-if="menu_visivel" :style="{top: menuY + 'px', left:menuX + 'px' }" @click.stop>
-            <p>Editar</p>
-            <p @click="excluir_credencial">Excluir</p>
-            <p @click="copiar_senha">Copiar senha</p>
+            <p @click="(e)=>{editar_credencial();fechar_menu()}">Editar</p>
+            <p @click="(e)=>{excluir_credencial(credencial_selecionada.id); fechar_menu()}">Excluir</p>
+            <p @click="(e)=>{copiar_senha();fechar_menu()}">Copiar senha</p>
         </div>
     
         
@@ -107,15 +202,29 @@
             <input type="text" v-model="modal_login">
 
             <label for="">Senha</label>
-            <input type="password" v-model="modal_senha">
-        
-            <button @click="salvar_credencial">
-                Salvar
-            </button>
+            <div class="input-senha">
+                <input :type="senha_visivel ? 'text' : 'password'" v-model="modal_senha">
+                <span @click="senha_visivel = !senha_visivel">
+                    <img v-if="senha_visivel" :src="olho_fechado">
+                    <img v-else :src="olho_aberto">
+                </span>
+            </div>  
 
-            <button @click="fechar_modal">
-                Cancelar
-            </button>
+            <button class="btn-gerador" @click="config_visivel = !config_visivel"> Gerar senha </button>
+            <div class="config-senha"v-if="config_visivel">
+                <div class="config-linha-tamanho">
+                    <input type="range" min="6" max="32" v-model="config_senha.tamanho">
+                    <span>{{ config_senha.tamanho }} dígitos</span>
+                </div>
+                <label><input type="checkbox" v-model="config_senha.letras">Letras</label>
+                <label><input type="checkbox" v-model="config_senha.numeros">números</label>
+                <label><input type="checkbox" v-model="config_senha.especiais">Caracteres especiais</label>
+                <button class="btn-gerar" @click="gerar_senha">Gerar</button>
+            </div>
+
+            <button class="btn-salvar" @click="salvar_credencial(credencial_selecionada?.id)"> Salvar </button>
+
+            <button class="btn-cancelar" @click="fechar_modal"> Cancelar </button>
         </div>
 
     </div>
@@ -124,19 +233,152 @@
 
 <style scoped>
 
-    .overlay {
+.input-senha {
+    position: relative;
+}
+
+.input-senha input {
+    padding-right: 40px; /* espaço pro ícone */
+}
+
+.input-senha img {
+    width: 20px;
+    height: 20px;
+}
+
+.input-senha span {
+    position: absolute;
+    right: 12px;
+    top: 55%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 999;
+  animation: fadeIn 0.2s ease;
 }
 
+.modal {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-radius: 24px;
+  padding: 32px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+.modal label {
+  display: block;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  margin-top: 18px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.modal label:first-of-type {
+  margin-top: 0;
+}
+
+.modal input {
+  width: 100%;
+  padding: 12px 16px;
+  background: #0f172a;
+  border: 1.5px solid #334155;
+  border-radius: 12px;
+  color: #f8fafc;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.modal input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.modal input::placeholder {
+  color: #475569;
+}
+
+.modal button {
+  margin-top: 24px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-salvar {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    margin:10px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-cancelar {
+    background: #1e293b;
+    color: #94a3b8;
+    border: 1px solid #334155;
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsivo */
+@media (max-width: 640px) {
+  .modal {
+    padding: 24px;
+    margin: 16px;
+    width: calc(100% - 32px);
+  }
+  
+  .modal button {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+  
+  .modal button:first-of-type {
+    margin-right: 0;
+  }
+}
 * {
     box-sizing: border-box;
 }
@@ -251,4 +493,111 @@ header {
   background: #334155;
 }
 
+/* Painel gerador de senha */
+.config-senha {
+    margin-top: 16px;
+    padding: 16px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Range slider */
+.config-senha input[type="range"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: #334155;
+    border-radius: 4px;
+    outline: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.config-senha input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #3b82f6;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.config-senha input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background: #2563eb;
+}
+
+/* Linha do tamanho */
+.config-linha-tamanho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.config-linha-tamanho span {
+    color: #3b82f6;
+    font-weight: 700;
+    font-size: 0.9rem;
+    min-width: 64px;
+    text-align: right;
+}
+
+/* Checkboxes */
+.config-senha label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-transform: none;
+    margin: 0;
+    letter-spacing: 0;
+}
+
+.config-senha input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #3b82f6;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 0;
+    margin: 0;
+}
+
+/* Botão gerar */
+.btn-gerar {
+    background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+    color: white !important;
+    margin-top: 4px !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+}
+
+.btn-gerar:hover {
+    background: linear-gradient(135deg, #4f46e5, #4338ca) !important;
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4) !important;
+}
+
+/* Botão abrir gerador */
+.btn-gerador {
+    background: #1e293b !important;
+    color: #6366f1 !important;
+    border: 1px solid #6366f1 !important;
+    margin-top: 16px !important;
+}
+
+.btn-gerador:hover {
+    background: #6366f1 !important;
+    color: white !important;
+}
 </style>

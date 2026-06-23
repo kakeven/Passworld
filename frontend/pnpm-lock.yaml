@@ -11,12 +11,18 @@ importers:
       pinia:
         specifier: ^3.0.4
         version: 3.0.4(vue@3.5.35)
+      sweetalert2:
+        specifier: ^11.26.25
+        version: 11.26.25
       vue:
         specifier: ^3.5.32
         version: 3.5.35
       vue-router:
         specifier: ^5.0.4
         version: 5.1.0(@vue/compiler-sfc@3.5.35)(pinia@3.0.4(vue@3.5.35))(vite@8.0.16(yaml@2.9.0))(vue@3.5.35)
+      vue-toastification:
+        specifier: 2.0.0-rc.5
+        version: 2.0.0-rc.5(vue@3.5.35)
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^6.0.6
@@ -785,6 +791,9 @@ packages:
     resolution: {integrity: sha512-H+ue8Zo4vJmV2nRjpx86P35lzwDT3nItnIsocgumgr0hHMQ+ZGq5vrERg9kJBo5AWGmxZDhzDo+WVIJqkB0cGA==}
     engines: {node: '>=16'}
 
+  sweetalert2@11.26.25:
+    resolution: {integrity: sha512-+hunCOJdJ6FLj04T9YSLvvZXRjsvIkTeTKP2e4VF8CaBias961BTnWiSFAy7F/CM5eq3QK2Rraoc5Gzftslvkg==}
+
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
@@ -904,6 +913,11 @@ packages:
         optional: true
       vite:
         optional: true
+
+  vue-toastification@2.0.0-rc.5:
+    resolution: {integrity: sha512-q73e5jy6gucEO/U+P48hqX+/qyXDozAGmaGgLFm5tXX4wJBcVsnGp4e/iJqlm9xzHETYOilUuwOUje2Qg1JdwA==}
+    peerDependencies:
+      vue: ^3.0.2
 
   vue@3.5.35:
     resolution: {integrity: sha512-cx89fnr+0kVGHiNFG6y6s0bdjypJRFNZn6x3WPstNdQR1bi1mbB7h4v5IBGTsPJU3nK1+0Iqj3Zf+hZWMieR4Q==}
@@ -1675,6 +1689,8 @@ snapshots:
     dependencies:
       copy-anything: 4.0.5
 
+  sweetalert2@11.26.25: {}
+
   tinyglobby@0.2.17:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.4)
@@ -1791,6 +1807,10 @@ snapshots:
       '@vue/compiler-sfc': 3.5.35
       pinia: 3.0.4(vue@3.5.35)
       vite: 8.0.16(yaml@2.9.0)
+
+  vue-toastification@2.0.0-rc.5(vue@3.5.35):
+    dependencies:
+      vue: 3.5.35
 
   vue@3.5.35:
     dependencies:
