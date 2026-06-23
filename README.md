@@ -101,6 +101,16 @@ npm run dev
 
 ---
 
+## 🖥️ Versão Desktop (Electron)
+
+Além da versão web, o PassWorld também conta com uma versão **desktop empacotada com Electron**, gerando um executável `.exe` standalone.
+
+- Arquitetura de dois processos do Electron (**main** e **renderer**), com o backend FastAPI rodando localmente como processo auxiliar
+- Empacotamento via **electron-builder**, gerando um instalador/executável `.exe` para Windows
+- Permite usar o PassWorld como aplicativo nativo, sem depender de navegador ou servidor externo
+
+---
+
 ## 👤 Autor
 
 **Kauã** — Estudante de Engenharia de Software e Desenvolvedor Full Stack.
