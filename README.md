@@ -82,7 +82,10 @@ passworld.vault
 - Boas práticas de segurança
 
 ---
-
+## 1º uso
+ao entrar pela primeira vez, a senha digitada será a senha mestra.
+Então, sempre precisará se lembrar dela.
+---
 ## ⚙️ Instalação
 
 ### Backend
