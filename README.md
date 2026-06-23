@@ -1,87 +1,89 @@
-# PassWorld
+# 🔐 PassWorld
 
-PassWorld é um gerenciador de senhas desenvolvido para armazenar credenciais de forma segura utilizando criptografia moderna e autenticação baseada em sessão.
+> Gerenciador de senhas com criptografia moderna e autenticação baseada em sessão.
 
-Diferente de aplicações que armazenam dados diretamente em bancos de dados tradicionais, o PassWorld utiliza um arquivo criptografado `.vault`, protegendo todas as informações através de uma senha mestra.
+PassWorld armazena credenciais de forma segura utilizando um arquivo criptografado `.vault`, ao invés de bancos de dados tradicionais. Todas as informações são protegidas por uma senha mestra, que nunca é salva em disco.
 
-## Principais Funcionalidades
+---
 
-* Armazenamento seguro de credenciais
-* Cadastro, edição e remoção de entradas
-* Geração automática de senhas fortes
-* Autenticação por token
-* Sessão com expiração automática
-* Arquivo de armazenamento criptografado
-* API REST para gerenciamento dos dados
+## ✨ Funcionalidades
 
-## Tecnologias Utilizadas
+- 🔒 Armazenamento seguro de credenciais
+- ➕ Cadastro, edição e remoção de entradas
+- 🎲 Geração automática de senhas fortes
+- 🔑 Autenticação por token
+- ⏱️ Sessão com expiração automática
+- 🗂️ Arquivo de armazenamento criptografado
+- 🌐 API REST para gerenciamento dos dados
 
-### Frontend
+---
 
-* Vue 3
-* JavaScript
-* Vite
+## 🛠️ Tecnologias
 
-### Backend
+| Camada | Stack |
+|---|---|
+| **Frontend** | Vue 3 · JavaScript · Vite |
+| **Backend** | Python · FastAPI |
 
-* Python
-* FastAPI
+---
 
-### Segurança
+## 🏗️ Arquitetura
 
-* Argon2id para derivação de chave criptográfica
-* AES-GCM para criptografia dos dados
-* Salt aleatório para proteção contra ataques de dicionário
-* Tokens de sessão gerados de forma segura
-* Expiração automática de sessão
-
-## Arquitetura
-
-O sistema utiliza uma senha mestra para derivar uma chave criptográfica através do algoritmo Argon2id. Essa chave é utilizada para criptografar e descriptografar todo o conteúdo do arquivo `.vault`.
+O sistema deriva uma chave criptográfica a partir da senha mestra usando **Argon2id**. Essa chave é então utilizada para criptografar e descriptografar todo o conteúdo do arquivo `.vault` com **AES-256-GCM**.
 
 Nenhuma credencial é armazenada em texto puro no disco.
 
-### Fluxo Simplificado
+### Fluxo simplificado
 
-```text
+```
 Senha Mestra
-      ↓
-   Argon2id
-      ↓
- Chave Criptográfica
-      ↓
-   AES-GCM
-      ↓
- passworld.vault
+     ↓
+  Argon2id
+     ↓
+Chave Criptográfica
+     ↓
+  AES-GCM
+     ↓
+passworld.vault
 ```
 
-## Destaques Técnicos
+---
 
-* Implementação de criptografia simétrica utilizando AES-256-GCM
-* Persistência em arquivo `.vault` criptografado
-* Escrita atômica para evitar corrupção de dados
-* CRUD completo de credenciais via API REST
-* Gerador de senhas configurável
-* Gerenciamento de sessão com expiração automática
+## 🚀 Destaques Técnicos
 
-## Segurança
+- Criptografia simétrica com **AES-256-GCM**
+- Persistência em arquivo `.vault` criptografado
+- Escrita atômica para evitar corrupção de dados
+- CRUD completo de credenciais via API REST
+- Gerador de senhas configurável
+- Gerenciamento de sessão com expiração automática
 
-O PassWorld utiliza criptografia AES-256-GCM com chaves derivadas via Argon2id para proteger todas as credenciais armazenadas. A senha mestra nunca é salva em disco, os dados permanecem criptografados em um arquivo `.vault` e o sistema conta com autenticação por token, expiração automática de sessão e salvamento atômico para maior confiabilidade dos dados.
+---
 
-## O que Aprendi
+## 🛡️ Segurança
 
-Durante o desenvolvimento deste projeto foram explorados conceitos como:
+- Criptografia **AES-256-GCM** com chaves derivadas via **Argon2id**
+- A senha mestra **nunca** é salva em disco
+- Dados permanecem criptografados no arquivo `.vault`
+- Autenticação por token
+- Expiração automática de sessão
+- Salvamento atômico para maior confiabilidade dos dados
 
-* Desenvolvimento de APIs com FastAPI
-* Criptografia aplicada
-* Gerenciamento seguro de credenciais
-* Autenticação baseada em token
-* Manipulação segura de arquivos
-* Arquitetura cliente-servidor
-* Boas práticas de segurança
+---
 
+## 📚 O que Aprendi
 
-## Instalação
+- Desenvolvimento de APIs com FastAPI
+- Criptografia aplicada
+- Gerenciamento seguro de credenciais
+- Autenticação baseada em token
+- Manipulação segura de arquivos
+- Arquitetura cliente-servidor
+- Boas práticas de segurança
+
+---
+
+## ⚙️ Instalação
 
 ### Backend
 
@@ -97,6 +99,8 @@ npm install
 npm run dev
 ```
 
-## Autor
+---
 
-Kauã — Estudante de Engenharia de Software e Desenvolvedor Full Stack.
+## 👤 Autor
+
+**Kauã** — Estudante de Engenharia de Software e Desenvolvedor Full Stack.
