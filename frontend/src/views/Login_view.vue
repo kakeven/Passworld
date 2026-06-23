@@ -15,8 +15,8 @@ async function entrar() {
         });
 
         if (resposta.token) {
-            localStorage.setItem("token", resposta.token);
-            router.push("/vault");
+            localStorage.setItem("token", resposta.token)
+            router.push("/vault")
         }
     } catch (erro) {
         console.error(erro);

@@ -7,14 +7,21 @@
     import Swal from 'sweetalert2'
     import olho_fechado from '@/assets/olho-fechado.svg'
     import olho_aberto from '@/assets/olho-aberto.svg'
-    
-    const toast = useToast()
+    import router from '@/router';
+   
+    const toast = useToast();
     const senha_visivel = ref(false)
     
     
     
-    function ver_token(){
-        return localStorage.getItem("token")
+    function verificar_token(){
+        const token = localStorage.getItem("token")
+        if(!token){
+            localStorage.removeItem("token")
+            router.push("/")
+            return false
+        }
+        return true
     }
     
     const config_visivel = ref(false)
@@ -40,16 +47,18 @@
 
     const buscar = ref('');
     const credenciais = ref([]);
+    
     onMounted(async () => {
-    try {
-        credenciais.value = await apiFetch("/entries")
-    } catch (erro) {
-        console.error(erro);
-    }
-    });
+    if(!verificar_token()){return}
+    window.addEventListener('click', fechar_menu)
+        try {
+            credenciais.value = await apiFetch("/entries")
+        } catch (erro) {
+            console.error(erro)
+        }
+    })
    
-    console.log(ver_token())
-    console.log(credenciais)
+    
 
     const menuX = ref(0);
     const menuY = ref(0);
@@ -107,12 +116,11 @@
         modal_visivel.value = false
         resetar_modal()
     }
-    onMounted (()=>{
-        window.addEventListener('click',fechar_menu)
-    })
+    
 
     onUnmounted(()=>{
         window.removeEventListener('click',fechar_menu)
+        verificar_token()
     })
 
     function copiar_senha(){

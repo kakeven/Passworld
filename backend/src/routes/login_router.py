@@ -1,13 +1,16 @@
 from fastapi import APIRouter,HTTPException,Header
 from schema.unlock_request import UnlockRequest
 from schema.entries_schema import  Entry
-from service.session import session
+from service.session import session,criar_token
 from service.vault_json import vault_exists, create_vault, open_vault,save_vault
 from service.gerador_senha import gerador
 import secrets
 
 login_router = APIRouter()
 
+def autenticar(token: str = Header()):
+    if session["token"] is None or session["token"] != token:
+        raise HTTPException(status_code=401, detail="Token inválido ou expirado")
 
 @login_router.post("/unlock")
 def unlock(body: UnlockRequest):
@@ -20,7 +23,7 @@ def unlock(body: UnlockRequest):
         except ValueError:
             raise HTTPException(status_code=401, detail="Senha mestra incorreta")
 
-    token = secrets.token_hex(32)
+    token = criar_token()
     session["token"] = token
     session["key"] = key
     session["vault"] = vault
@@ -29,14 +32,13 @@ def unlock(body: UnlockRequest):
 
 @login_router.get("/entries")
 def show_entries(token:str = Header(...)):
-    if session["token"] == token:
-        return(session["vault"]["entries"])
-    raise HTTPException(status_code=401, detail="Sessão expirada")
+    autenticar(token)
+    return(session["vault"]["entries"])
+    
 
 @login_router.post("/create_entry")
 def create_entry(body:Entry,token:str = Header(...)):
-    if session["token"] != token:
-        return HTTPException(status_code=401, detail="Sessão expirada")
+    autenticar(token)
     entry = {
         "id": secrets.token_hex(8),
         "service": body.service,
@@ -51,8 +53,9 @@ def create_entry(body:Entry,token:str = Header(...)):
 
 @login_router.delete("/entries/delete/{entry_id}")
 def delete_entry(entry_id,token:str = Header(...)):
-    if session["token"] != token:
-        return HTTPException(status_code=401, detail="Sessão expirada")
+    
+    autenticar(token)
+
     entries = session["vault"]["entries"]
     filtro = [e for e in entries if e["id"]!= entry_id]
     
@@ -65,8 +68,8 @@ def delete_entry(entry_id,token:str = Header(...)):
 
 @login_router.patch("/update_entry/{entry_id}")
 def update_entry(entry_id: str, body: Entry, token: str = Header(...)):
-    if session["token"] != token:
-        raise HTTPException(status_code=401, detail="Sessão expirada")
+    
+    autenticar(token)
 
     entries = session["vault"]["entries"]
 
@@ -82,6 +85,7 @@ def update_entry(entry_id: str, body: Entry, token: str = Header(...)):
 
 
 @login_router.get("/generate")
-def generate_password(tamanho: int,letras:bool = True,numeros: bool=True,especiais:bool = True):
+def generate_password(tamanho: int,letras:bool = True,numeros: bool=True,especiais:bool = True,token: str = Header(...)):
+    autenticar(token)
     password=gerador(tamanho,letras,numeros,especiais)
     return {"password": password}
